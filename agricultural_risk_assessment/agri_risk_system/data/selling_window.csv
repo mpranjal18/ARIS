@@ -1,0 +1,2 @@
+signal,message,expected_price,baseline_price,expected_gain
+Sell,Recommended selling period: 04 Apr - 08 Apr,2435.14,2386.68,48.46

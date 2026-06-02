@@ -1,0 +1,8 @@
+feature,importance,model
+pest_risk,0.6142656151611652,Random Forest
+climate_risk,0.15414293065230356,Random Forest
+pest_level,0.11916400740642284,Random Forest
+rainfall,0.043392209177107365,Random Forest
+temperature,0.030912334813926544,Random Forest
+humidity,0.019504540533712648,Random Forest
+ndvi,0.01861836225536193,Random Forest
