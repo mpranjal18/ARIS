@@ -1,6 +1,13 @@
-"""CatBoost model wrapper for agricultural risk prediction."""
+"""CatBoost model wrapper for agricultural risk prediction.
+
+This module provides a CatBoost regressor wrapper optimized for agricultural 
+risk assessment tasks with configurable hyperparameters.
+
+Contributed by: Satwik Agrawal
+"""
 
 from catboost import CatBoostRegressor
+import numpy as np
 
 from config.config import SEED
 from models.base_model import BaseRiskModel
@@ -20,10 +27,24 @@ class CatBoostRiskModel(BaseRiskModel):
             verbose=False,
         )
 
-    def train(self, x_train, y_train) -> None:
+    def train(self, x_train: np.ndarray, y_train: np.ndarray) -> None:
+        """Train CatBoost model.
+        
+        Args:
+            x_train: Training feature array
+            y_train: Training target array
+        """
         self.model.fit(x_train, y_train)
 
-    def predict(self, x_input):
+    def predict(self, x_input: np.ndarray) -> np.ndarray:
+        """Generate predictions using trained model.
+        
+        Args:
+            x_input: Input feature array
+            
+        Returns:
+            Predicted risk values
+        """
         return self.model.predict(x_input)
 import numpy as np
 from catboost import CatBoostRegressor

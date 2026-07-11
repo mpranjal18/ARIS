@@ -1,6 +1,13 @@
-"""XGBoost model wrapper for agricultural risk prediction."""
+"""XGBoost model wrapper for agricultural risk prediction.
+
+This module provides an XGBoost regressor wrapper optimized for agricultural
+risk assessment with balanced tree depth and learning rate.
+
+Contributed by: Satwik Agrawal
+"""
 
 from xgboost import XGBRegressor
+import numpy as np
 
 from config.config import SEED
 from models.base_model import BaseRiskModel
@@ -21,10 +28,24 @@ class XGBoostRiskModel(BaseRiskModel):
             objective="reg:squarederror",
         )
 
-    def train(self, x_train, y_train) -> None:
+    def train(self, x_train: np.ndarray, y_train: np.ndarray) -> None:
+        """Train XGBoost model.
+        
+        Args:
+            x_train: Training feature array
+            y_train: Training target array
+        """
         self.model.fit(x_train, y_train)
 
-    def predict(self, x_input):
+    def predict(self, x_input: np.ndarray) -> np.ndarray:
+        """Generate predictions using trained model.
+        
+        Args:
+            x_input: Input feature array
+            
+        Returns:
+            Predicted risk values
+        """
         return self.model.predict(x_input)
 import numpy as np
 from xgboost import XGBRegressor

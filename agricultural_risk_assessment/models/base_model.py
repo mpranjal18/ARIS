@@ -19,12 +19,30 @@ class BaseRiskModel(ABC):
         self.model = None
 
     @abstractmethod
-    def train(self, x_train, y_train) -> None:
-        """Train model on provided inputs and targets."""
+    def train(self, x_train: np.ndarray, y_train: np.ndarray) -> None:
+        """Train model on provided inputs and targets.
+        
+        Args:
+            x_train: Input feature array of shape (n_samples, n_features)
+            y_train: Target array of shape (n_samples,)
+            
+        Raises:
+            ValueError: If input shapes are incompatible
+        """
 
     @abstractmethod
-    def predict(self, x_input):
-        """Run inference for provided model inputs."""
+    def predict(self, x_input: np.ndarray) -> np.ndarray:
+        """Run inference for provided model inputs.
+        
+        Args:
+            x_input: Input feature array of shape (n_samples, n_features)
+            
+        Returns:
+            Predictions array of shape (n_samples,)
+            
+        Raises:
+            RuntimeError: If model has not been trained
+        """
 
     def evaluate(self, y_true, y_pred) -> Dict[str, float]:
         """Computes standard regression metrics for model comparison."""
@@ -34,13 +52,39 @@ class BaseRiskModel(ABC):
         return {"RMSE": rmse, "MAE": mae, "R2": r2}
 
     def save(self, filepath: str) -> None:
-        """Persists model artifact to disk."""
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        joblib.dump(self.model, filepath)
+        """Persists model artifact to disk.
+        
+        Args:
+            filepath: Path where model artifact will be saved
+            
+        Raises:
+            IOError: If file cannot be written
+            RuntimeError: If model is not initialized
+        """
+        if self.model is None:
+            raise RuntimeError(f"Cannot save {self.model_name}: model not initialized")
+        try:
+            os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
+            joblib.dump(self.model, filepath)
+        except Exception as e:
+            raise IOError(f"Failed to save model to {filepath}: {str(e)}")
 
     def load(self, filepath: str) -> None:
-        """Loads model artifact from disk."""
-        self.model = joblib.load(filepath)
+        """Loads model artifact from disk.
+        
+        Args:
+            filepath: Path to saved model artifact
+            
+        Raises:
+            FileNotFoundError: If model file does not exist
+            IOError: If file cannot be read
+        """
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"Model file not found at {filepath}")
+        try:
+            self.model = joblib.load(filepath)
+        except Exception as e:
+            raise IOError(f"Failed to load model from {filepath}: {str(e)}")
 import pandas as pd
 import numpy as np
 from abc import ABC, abstractmethod
