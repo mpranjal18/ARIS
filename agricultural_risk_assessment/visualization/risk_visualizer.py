@@ -82,12 +82,59 @@ class RiskVisualizer:
         ax.set_ylabel("Score (0-100)")
         return self._save_fig(fig, "regional_risk_comparison.png")
 
-    def make_interactive_combined_plot(self, df: pd.DataFrame, region: str):
-        """Returns plotly figure for Streamlit rendering."""
+    def summarize_region_risk(self, df: pd.DataFrame, region: str, risk_col: str = "predicted_total_risk") -> pd.DataFrame:
+        """Builds a compact trend summary for a single region."""
         region_df = df[df["region"] == region].sort_values("date")
+        if region_df.empty:
+            return pd.DataFrame(columns=["region", "latest_risk", "previous_risk", "change", "status"])
+
+        latest = region_df.iloc[-1]
+        previous = region_df.iloc[-2] if len(region_df) > 1 else latest
+        latest_risk = float(latest[risk_col])
+        previous_risk = float(previous[risk_col])
+        change = latest_risk - previous_risk
+        if latest_risk >= 70:
+            status = "high"
+        elif latest_risk >= 40:
+            status = "medium"
+        else:
+            status = "low"
+        return pd.DataFrame(
+            [{"region": region, "latest_risk": latest_risk, "previous_risk": previous_risk, "change": change, "status": status}]
+        )
+
+    def make_interactive_combined_plot(self, df: pd.DataFrame, region: str):
+        """Returns a polished Plotly figure for Streamlit rendering."""
+        region_df = df[df["region"] == region].sort_values("date")
+        if region_df.empty:
+            return px.line(title=f"Combined Risk - {region}")
+
         plot_df = region_df[["date", "climate_risk_score", "pest_disease_risk_score", "predicted_total_risk"]]
         melted = plot_df.melt(id_vars="date", var_name="Risk Type", value_name="Score")
-        return px.line(melted, x="date", y="Score", color="Risk Type", title=f"Combined Risk - {region}")
+        fig = px.line(
+            melted,
+            x="date",
+            y="Score",
+            color="Risk Type",
+            title=f"Combined Risk - {region}",
+            template="plotly_white",
+            color_discrete_map={
+                "climate_risk_score": "#2563eb",
+                "pest_disease_risk_score": "#f97316",
+                "predicted_total_risk": "#16a34a",
+            },
+        )
+        fig.update_layout(
+            hovermode="x unified",
+            margin=dict(l=10, r=10, t=55, b=10),
+            legend_title_text="Risk Type",
+            yaxis_title="Risk Score",
+            xaxis_title="Date",
+        )
+        fig.update_yaxes(range=[0, 100])
+        fig.add_hline(y=70, line_dash="dash", line_color="rgba(220,38,38,0.65)", annotation_text="Alert threshold")
+        fig.update_traces(line=dict(width=2.6))
+        return fig
 
     def create_all_visualizations(self, results_df: pd.DataFrame, comparison_df: pd.DataFrame) -> None:
         """Creates all required visual outputs for primary regions."""

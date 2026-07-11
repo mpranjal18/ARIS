@@ -20,6 +20,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 from config.config import PRIMARY_REGIONS, RISK_LEVEL_THRESHOLDS
 from main import run_pipeline
 from utils.feature_engineering import build_feature_columns
+from visualization.risk_visualizer import RiskVisualizer
 
 
 st.set_page_config(page_title="Agri Risk Intelligence System", page_icon="🌾", layout="wide")
@@ -29,6 +30,8 @@ RISK_COLUMNS = {
     "Pest": "pest_disease_risk_score",
     "Combined": "predicted_total_risk",
 }
+
+visualizer = RiskVisualizer()
 
 REGION_COORDS = {
     "Bhopal": {"lat": 23.2599, "lon": 77.4126},
@@ -440,6 +443,22 @@ def render_dashboard() -> None:
             delta_pct = 0.0 if prev.mean() == 0 else ((recent.mean() - prev.mean()) / prev.mean()) * 100
             with box:
                 make_kpi_card(title, icon, float(recent.mean()), float(delta_pct), region_df[col])
+
+        summary_row = visualizer.summarize_region_risk(filtered_df, selected_region, risk_col).iloc[0]
+        trend_text = "increasing" if summary_row["change"] >= 0 else "decreasing"
+        status_label = {"high": "High", "medium": "Moderate", "low": "Low"}[summary_row["status"]]
+        st.markdown("### Regional Snapshot")
+        st.markdown(
+            f"""
+            <div class="glass">
+                <strong>{selected_region}</strong> is currently at <strong>{summary_row['latest_risk']:.1f}</strong> on the selected lens,
+                with a {trend_text} trend of <strong>{summary_row['change']:+.1f}</strong> points versus the prior window.
+                <br>Current status: <strong>{status_label}</strong>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.plotly_chart(visualizer.make_interactive_combined_plot(filtered_df, selected_region), use_container_width=True)
 
         st.markdown("### AI Insights")
         for insight in build_ai_insights(filtered_df, selected_region, risk_col):
