@@ -89,13 +89,13 @@ agricultural_risk_assessment/
 - Windows PowerShell (or any shell)
 - pip
 
-## Setup (No Virtual Environment Required)
+## Setup
 
-From project root:
+From the repository root or current directory:
 
 ```powershell
-cd C:\Users\HP\Desktop\A_IS\agricultural_risk_assessment
-py -3 -m pip install --user -r requirements.txt
+cd agricultural_risk_assessment
+pip install -r requirements.txt
 ```
 
 ## Run Commands
@@ -103,22 +103,21 @@ py -3 -m pip install --user -r requirements.txt
 ### 1) Run full pipeline (training + outputs)
 
 ```powershell
-cd C:\Users\HP\Desktop\A_IS\agricultural_risk_assessment
-py -3 main.py
+cd agricultural_risk_assessment
+python main.py
 ```
 
 ### 2) Run Streamlit dashboard
 
 ```powershell
-cd C:\Users\HP\Desktop\A_IS\agricultural_risk_assessment
-py -3 -m streamlit run dashboard.py
+cd agricultural_risk_assessment
+streamlit run dashboard.py
 ```
 
-If running from one folder above:
+If running from the repository root:
 
 ```powershell
-cd C:\Users\HP\Desktop\A_IS
-py -3 -m streamlit run agricultural_risk_assessment/dashboard.py
+streamlit run agricultural_risk_assessment/dashboard.py
 ```
 
 ## Generated Outputs

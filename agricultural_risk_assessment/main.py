@@ -17,11 +17,11 @@ from visualization.data_fusion_architecture import create_data_fusion_architectu
 from visualization.risk_visualizer import RiskVisualizer
 
 
-def run_pipeline() -> dict:
+def run_pipeline(sequence_len: int = 14, infer_model: str = "CatBoost") -> dict:
     """Runs complete production pipeline and returns key objects for app usage."""
     data_handler = DataHandler()
     visualizer = RiskVisualizer()
-    risk_system = AgriculturalRiskAssessmentSystem(sequence_len=14)
+    risk_system = AgriculturalRiskAssessmentSystem(sequence_len=sequence_len)
 
     bundle = data_handler.load_or_generate_bundle()
     merged = merge_raw_data(bundle.weather, bundle.ndvi, bundle.pest)
@@ -32,7 +32,7 @@ def run_pipeline() -> dict:
     metrics = risk_system.train_and_evaluate(dataset, feature_cols, "total_risk_score")
 
     dataset["predicted_total_risk"] = np.clip(
-        risk_system.infer_total_risk(dataset, feature_cols, model_name="CatBoost"), 0, 100
+        risk_system.infer_total_risk(dataset, feature_cols, model_name=infer_model), 0, 100
     )
     dataset["prediction_gap"] = dataset["total_risk_score"] - dataset["predicted_total_risk"]
 
@@ -54,12 +54,29 @@ def run_pipeline() -> dict:
 
 
 def main() -> None:
-    """CLI execution wrapper."""
+    """CLI execution wrapper with parameter arguments."""
+    import argparse
+    parser = argparse.ArgumentParser(description="🌾 Agricultural Risk Assessment System CLI Pipeline")
+    parser.add_argument(
+        "--sequence-len", 
+        type=int, 
+        default=14, 
+        help="Sequence length for memory-based models (e.g., LSTM)"
+    )
+    parser.add_argument(
+        "--infer-model", 
+        type=str, 
+        default="CatBoost", 
+        help="Model name to run final inference on the dataset (e.g., CatBoost, RandomForest, XGBoost)"
+    )
+    args = parser.parse_args()
+
     print("🌾 Agricultural Risk Assessment System")
     print("-" * 52)
     print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"Configuration: sequence_len={args.sequence_len}, infer_model={args.infer_model}")
 
-    output = run_pipeline()
+    output = run_pipeline(sequence_len=args.sequence_len, infer_model=args.infer_model)
 
     print("\nTraining complete.")
     print(f"Risk results saved: {output['results_path']}")

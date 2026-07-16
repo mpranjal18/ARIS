@@ -9,22 +9,22 @@ Quick start
 2. Install dependencies:
 
 ```powershell
-cd C:\Users\HP\Desktop\A_IS\agricultural_risk_assessment
-py -3 -m pip install -r requirements.txt
+cd agricultural_risk_assessment
+pip install -r requirements.txt
 ```
 
 3. Run the full pipeline (training + outputs):
 
 ```powershell
-cd C:\Users\HP\Desktop\A_IS\agricultural_risk_assessment
-py -3 main.py
+cd agricultural_risk_assessment
+python main.py
 ```
 
 4. Run the Streamlit dashboard:
 
 ```powershell
-cd C:\Users\HP\Desktop\A_IS
-py -3 -m streamlit run agricultural_risk_assessment/dashboard.py
+cd agricultural_risk_assessment
+streamlit run dashboard.py
 ```
 
 Generated outputs:
